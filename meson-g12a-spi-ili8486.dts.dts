@@ -1,0 +1,52 @@
+
+/dts-v1/;
+/plugin/;
+
+/ {
+        compatible = "radxa,zero3w", "amlogic,g12a";
+
+        fragment@0 {
+                target = "/soc/spi@0";
+                __overlay__ {
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+                        pinctrl-0 = <&lcd_pins>;
+                        pinctrl-names = "default";
+                        ili9486@0 {
+                        compatible = "ilitek,ili9486";
+                        status = "okay";
+                        reg = <0>;
+                        spi-max-frequency = <50000000>;
+                        width = <320>;
+                        height = <480>;
+                        buswidth = <8>;
+                        fps = <60>;
+                        rotate = <180>;
+                        debug = <7>;
+
+                        // configure pin assigment below
+                        reset-gpios = <&gpio 22 GPIO_ACTIVE_LOW>;       // pin 22
+                        rs-gpios    = <&gpio 18 GPIO_ACTIVE_HIGH>;
+                        cs-gpios    = <&gpio 24 GPIO_ACTIVE_LOW>;
+                        tp-cs-gpios = <&gpio 26 GPIO_ACTIVE_LOW>;
+                        tp-irq-gpios= <&gpio 11 GPIO_ACTIVE_LOW>;
+                        };
+                };
+        };
+        fragment@1 {
+        target = <&pinctrl>;
+        __overlay__ {
+            lcd_pins: lcd_pins {
+                /* 
+                 * Mapping from your table:
+                 * 11: TP_IRQ, 18: LCD_RS, 19: LCD_SI/TP_SI, 21: TP_SO,
+                 * 22: RST, 23: LCD_SCK/TP_SCK, 24: LCD_CS, 26: TP_CS
+                 */
+                pins = "gpio11", "gpio18", "gpio19", "gpio21",
+                       "gpio22", "gpio23", "gpio24", "gpio26";
+                function = "spi";
+                bias-pull-up;  /* or add other settings (e.g. drive-strength) as required */
+            };
+        };
+        };
+};
